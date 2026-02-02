@@ -26,6 +26,7 @@ class AppNavigationRail extends StatelessWidget {
         color: Colors.white,
         fontWeight: FontWeight.w600,
       ),
+
       unselectedLabelTextStyle: const TextStyle(color: Colors.grey),
 
       destinations: const [
@@ -36,6 +37,7 @@ class AppNavigationRail extends StatelessWidget {
           ),
           label: Text('Dashboard'),
         ),
+
         NavigationRailDestination(
           icon: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -43,6 +45,7 @@ class AppNavigationRail extends StatelessWidget {
           ),
           label: Text('Add Card'),
         ),
+
         NavigationRailDestination(
           icon: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -50,6 +53,7 @@ class AppNavigationRail extends StatelessWidget {
           ),
           label: Text('Items'),
         ),
+
         NavigationRailDestination(
           icon: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),

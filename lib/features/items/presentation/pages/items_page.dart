@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../../core/data/items_store.dart';
 
-class ItemsPage extends StatelessWidget {
+class ItemsPage extends StatefulWidget {
   const ItemsPage({super.key});
 
   @override
+  State<ItemsPage> createState() => _ItemsPageState();
+}
+
+class _ItemsPageState extends State<ItemsPage> {
+  @override
   Widget build(BuildContext context) {
-    final items = ItemsStore.items; // 🔹 real data
+    final items = ItemsStore.items;
 
     return Container(
       color: Colors.grey.shade100,
@@ -36,6 +41,15 @@ class ItemsPage extends StatelessWidget {
                         child: ListTile(
                           leading: const Icon(Icons.inventory),
                           title: Text(items[index]),
+
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                ItemsStore.items.removeAt(index);
+                              });
+                            },
+                          ),
                         ),
                       );
                     },

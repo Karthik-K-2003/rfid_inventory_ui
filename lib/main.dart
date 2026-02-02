@@ -3,7 +3,8 @@ import 'core/widgets/app_navigation.dart';
 import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/add_card/presentation/pages/add_card_page.dart';
 import 'features/items/presentation/pages/items_page.dart';
-import 'features/handlers/presentation/pages/handlers_page.dart';
+// import 'features/handlers/presentation/pages/handlers_page.dart';
+import 'features/handlers/presentation/pages/add_handler_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +32,13 @@ class DashboardShell extends StatefulWidget {
 class _DashboardShellState extends State<DashboardShell> {
   int selectedIndex = 0;
 
-  final pages = [DashboardPage(), AddCardPage(), ItemsPage(), HandlersPage()];
+  final pages = [
+    DashboardPage(),
+    AddCardPage(),
+    ItemsPage(),
+    // HandlersPage(),
+    AddHandlerPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
