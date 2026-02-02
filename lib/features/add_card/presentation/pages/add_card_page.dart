@@ -97,7 +97,7 @@ class _AddCardPageState extends State<AddCardPage> {
                       itemPriceController.clear();
                       itemExpiryDateController.clear();
 
-                      AppToast.showSuccess(context, "Item added");
+                      AppToast.showSuccess(context, "Added successfully");
                     }
                   },
 
