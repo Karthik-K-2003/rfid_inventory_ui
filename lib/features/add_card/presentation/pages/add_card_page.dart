@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/data/items_store.dart';
-import '../widgets/form_row.dart';
 import '../../../../core/data/handlers_store.dart';
 import '../../../../core/utils/app_toast.dart';
 
@@ -12,22 +10,20 @@ class AddCardPage extends StatefulWidget {
 }
 
 class _AddCardPageState extends State<AddCardPage> {
+  final TextEditingController cardUidController = TextEditingController();
   final TextEditingController handlerController = TextEditingController();
-  final TextEditingController itemController = TextEditingController();
-  final TextEditingController itemIdController = TextEditingController();
-  final TextEditingController itemQuantityController = TextEditingController();
-  final TextEditingController itemPriceController = TextEditingController();
-  final TextEditingController itemExpiryDateController =
-      TextEditingController();
+
+  String? selectedRole;
+  String? selectedStatus;
+
+  final List<String> roles = ["Shopkeeper", "Manager", "Admin", "Security"];
+
+  final List<String> statuses = ["Authorized", "Unauthorized"];
 
   @override
   void dispose() {
+    cardUidController.dispose();
     handlerController.dispose();
-    itemController.dispose();
-    itemIdController.dispose();
-    itemQuantityController.dispose();
-    itemPriceController.dispose();
-    itemExpiryDateController.dispose();
     super.dispose();
   }
 
@@ -48,32 +44,89 @@ class _AddCardPageState extends State<AddCardPage> {
                 "Add Card",
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 24),
 
-              FormRow(
-                c1: handlerController,
-                label1: "Handler Name",
-                c2: itemController,
-                label2: "Item name",
+              // Row 1: Card UID + Handler Name
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: cardUidController,
+                      decoration: const InputDecoration(
+                        labelText: "Card UID",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: handlerController,
+                      decoration: const InputDecoration(
+                        labelText: "Handler Name",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 16),
-              FormRow(
-                c1: itemIdController,
-                label1: "Item ID",
-                c2: itemQuantityController,
-                label2: "Item Quantity",
-              ),
-              const SizedBox(height: 16),
-              FormRow(
-                c1: itemPriceController,
-                label1: "Item Price",
-                c2: itemExpiryDateController,
-                label2: "Item Expiry Date",
+
+              // Row 2: Role + Status (Dropdowns)
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: selectedRole,
+                      items: roles
+                          .map(
+                            (role) => DropdownMenuItem(
+                              value: role,
+                              child: Text(role),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedRole = value!;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Role",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: selectedStatus,
+                      items: statuses
+                          .map(
+                            (status) => DropdownMenuItem(
+                              value: status,
+                              child: Text(status),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedStatus = value!;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Status",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 32),
 
+              // Add Button
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -85,22 +138,19 @@ class _AddCardPageState extends State<AddCardPage> {
                     ),
                   ),
                   onPressed: () {
-                    if (handlerController.text.isNotEmpty &&
-                        itemController.text.isNotEmpty) {
-                      HandlersStore.handlers.add(handlerController.text);
-                      ItemsStore.items.add(itemController.text);
+                    if (cardUidController.text.isNotEmpty &&
+                        handlerController.text.isNotEmpty) {
+                      // Store data (simple version)
+                      HandlersStore.handlers.add(
+                        "${handlerController.text} ($selectedRole - $selectedStatus)",
+                      );
 
+                      cardUidController.clear();
                       handlerController.clear();
-                      itemController.clear();
-                      itemIdController.clear();
-                      itemQuantityController.clear();
-                      itemPriceController.clear();
-                      itemExpiryDateController.clear();
 
-                      AppToast.showSuccess(context, "Added successfully");
+                      AppToast.showSuccess(context, "Card added successfully");
                     }
                   },
-
                   child: const Text(
                     "Add",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

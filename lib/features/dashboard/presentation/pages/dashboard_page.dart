@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import '../../../../core/data/items_store.dart';
+import '../../../../core/data/handlers_store.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  @override
   Widget build(BuildContext context) {
+    final totalItems = ItemsStore.items.length;
+    final totalHandlers = HandlersStore.handlers.length;
+
     return Container(
       color: Colors.grey.shade100,
       padding: const EdgeInsets.all(24),
@@ -24,14 +34,18 @@ class DashboardPage extends StatelessWidget {
 
           // Cards Row
           Row(
-            children: const [
+            children: [
               StatCard(
                 title: "Total Items",
-                value: "120",
+                value: totalItems.toString(),
                 icon: Icons.inventory,
               ),
-              SizedBox(width: 24),
-              StatCard(title: "Handlers", value: "8", icon: Icons.people),
+              const SizedBox(width: 24),
+              StatCard(
+                title: "Handlers",
+                value: totalHandlers.toString(),
+                icon: Icons.people,
+              ),
             ],
           ),
 
@@ -49,9 +63,11 @@ class DashboardPage extends StatelessWidget {
                     vertical: 14,
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {}); // refresh dashboard manually if needed
+                },
                 child: const Text(
-                  "Submit",
+                  "Refresh",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
