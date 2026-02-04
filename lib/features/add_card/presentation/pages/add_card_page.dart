@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/data/handlers_store.dart';
+import '../../../../core/services/firebase_service.dart';
 import '../../../../core/utils/app_toast.dart';
 
 class AddCardPage extends StatefulWidget {
@@ -73,12 +73,13 @@ class _AddCardPageState extends State<AddCardPage> {
 
               const SizedBox(height: 16),
 
-              // Row 2: Role + Status (Dropdowns)
+              // Row 2: Role + Status
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: selectedRole,
+                      hint: const Text("Select Role"),
                       items: roles
                           .map(
                             (role) => DropdownMenuItem(
@@ -89,11 +90,10 @@ class _AddCardPageState extends State<AddCardPage> {
                           .toList(),
                       onChanged: (value) {
                         setState(() {
-                          selectedRole = value!;
+                          selectedRole = value;
                         });
                       },
                       decoration: const InputDecoration(
-                        labelText: "Role",
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -102,6 +102,7 @@ class _AddCardPageState extends State<AddCardPage> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: selectedStatus,
+                      hint: const Text("Select Status"),
                       items: statuses
                           .map(
                             (status) => DropdownMenuItem(
@@ -112,11 +113,10 @@ class _AddCardPageState extends State<AddCardPage> {
                           .toList(),
                       onChanged: (value) {
                         setState(() {
-                          selectedStatus = value!;
+                          selectedStatus = value;
                         });
                       },
                       decoration: const InputDecoration(
-                        labelText: "Status",
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -137,16 +137,25 @@ class _AddCardPageState extends State<AddCardPage> {
                       vertical: 16,
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (cardUidController.text.isNotEmpty &&
-                        handlerController.text.isNotEmpty) {
-                      // Store data (simple version)
-                      HandlersStore.handlers.add(
-                        "${handlerController.text} ($selectedRole - $selectedStatus)",
-                      );
+                        handlerController.text.isNotEmpty &&
+                        selectedRole != null &&
+                        selectedStatus != null) {
+                      await FirebaseService.addHandler({
+                        "cardUid": cardUidController.text,
+                        "name": handlerController.text,
+                        "role": selectedRole,
+                        "status": selectedStatus,
+                        "createdAt": DateTime.now().toIso8601String(),
+                      });
 
                       cardUidController.clear();
                       handlerController.clear();
+                      setState(() {
+                        selectedRole = null;
+                        selectedStatus = null;
+                      });
 
                       AppToast.showSuccess(context, "Card added successfully");
                     }

@@ -29,7 +29,7 @@ class AppNavigationRail extends StatelessWidget {
 
       unselectedLabelTextStyle: const TextStyle(color: Colors.grey),
 
-      destinations: const [
+      destinations: [
         NavigationRailDestination(
           icon: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -60,6 +60,14 @@ class AppNavigationRail extends StatelessWidget {
             child: Icon(Icons.people),
           ),
           label: Text('Handlers'),
+        ),
+
+        NavigationRailDestination(
+          icon: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Icon(Icons.history),
+          ),
+          label: Text('Logs'),
         ),
       ],
     );

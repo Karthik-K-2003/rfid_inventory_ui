@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../../core/data/items_store.dart';
-import '../../../../core/data/handlers_store.dart';
+import 'package:firebase_database/firebase_database.dart';
+import '../../../../core/services/firebase_service.dart';
 
-class DashboardPage extends StatefulWidget {
+class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
-}
-
-class _DashboardPageState extends State<DashboardPage> {
-  @override
   Widget build(BuildContext context) {
-    final totalItems = ItemsStore.items.length;
-    final totalHandlers = HandlersStore.handlers.length;
-
     return Container(
       color: Colors.grey.shade100,
       padding: const EdgeInsets.all(24),
@@ -35,57 +27,16 @@ class _DashboardPageState extends State<DashboardPage> {
           // Cards Row
           Row(
             children: [
-              StatCard(
+              _buildCountCard(
                 title: "Total Items",
-                value: totalItems.toString(),
                 icon: Icons.inventory,
+                ref: FirebaseService.itemsRef(),
               ),
               const SizedBox(width: 24),
-              StatCard(
+              _buildCountCard(
                 title: "Handlers",
-                value: totalHandlers.toString(),
                 icon: Icons.people,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
-
-          // Buttons Row
-          Row(
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 14,
-                  ),
-                ),
-                onPressed: () {
-                  setState(() {}); // refresh dashboard manually if needed
-                },
-                child: const Text(
-                  "Refresh",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(width: 16),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.blue,
-                  side: const BorderSide(color: Colors.blue),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 14,
-                  ),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                ref: FirebaseService.handlersRef(),
               ),
             ],
           ),
@@ -93,62 +44,66 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-}
 
-class StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
+  Widget _buildCountCard({
+    required String title,
+    required IconData icon,
+    required DatabaseReference ref,
+  }) {
+    return StreamBuilder(
+      stream: ref.onValue,
+      builder: (context, snapshot) {
+        int count = 0;
 
-  const StatCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
+        if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+          final data = snapshot.data!.snapshot.value as Map;
+          count = data.length;
+        }
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 300,
-      height: 160,
-      child: Card(
-        color: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Row(
-            children: [
-              Icon(icon, size: 40, color: Colors.blue),
-              const SizedBox(width: 18),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+        return SizedBox(
+          width: 300,
+          height: 160,
+          child: Card(
+            color: Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                  Icon(icon, size: 40, color: Colors.blue),
+                  const SizedBox(width: 18),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        count.toString(),
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

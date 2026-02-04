@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../../core/data/items_store.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
+import '../../../../core/services/firebase_service.dart';
 import 'add_item_page.dart';
 
-class ItemsPage extends StatefulWidget {
+class ItemsPage extends StatelessWidget {
   const ItemsPage({super.key});
 
   @override
-  State<ItemsPage> createState() => _ItemsPageState();
-}
-
-class _ItemsPageState extends State<ItemsPage> {
-  @override
   Widget build(BuildContext context) {
-    final items = ItemsStore.items;
-
     return Scaffold(
       body: Container(
         color: Colors.grey.shade100,
@@ -28,33 +22,41 @@ class _ItemsPageState extends State<ItemsPage> {
             const SizedBox(height: 24),
 
             Expanded(
-              child: items.isEmpty
-                  ? const Center(
+              child: FirebaseAnimatedList(
+                query: FirebaseService.itemsRef(),
+
+                // While loading
+                defaultChild: const Center(child: CircularProgressIndicator()),
+
+                itemBuilder: (context, snapshot, animation, index) {
+                  // When list is empty
+                  if (!snapshot.exists) {
+                    return const Center(
                       child: Text(
-                        "No items added yet",
-                        style: TextStyle(fontSize: 18),
+                        "No items found",
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
                       ),
-                    )
-                  : ListView.separated(
-                      itemCount: items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        return Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.inventory),
-                            title: Text(items[index]),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                setState(() {
-                                  ItemsStore.items.removeAt(index);
-                                });
-                              },
-                            ),
-                          ),
-                        );
-                      },
+                    );
+                  }
+
+                  final data = snapshot.value as Map;
+                  final key = snapshot.key!;
+
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.inventory),
+                      title: Text(data['name']),
+                      subtitle: Text("${data['category']} - ${data['status']}"),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          FirebaseService.deleteItem(key);
+                        },
+                      ),
                     ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -67,9 +69,7 @@ class _ItemsPageState extends State<ItemsPage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddItemPage()),
-          ).then((_) {
-            setState(() {});
-          });
+          );
         },
       ),
     );
