@@ -3,7 +3,10 @@ import '../../../../core/services/firebase_service.dart';
 import '../../../../core/utils/app_toast.dart';
 
 class AddItemPage extends StatefulWidget {
-  const AddItemPage({super.key});
+  final String? editKey;
+  final Map? existingData;
+
+  const AddItemPage({super.key, this.editKey, this.existingData});
 
   @override
   State<AddItemPage> createState() => _AddItemPageState();
@@ -24,6 +27,56 @@ class _AddItemPageState extends State<AddItemPage> {
   ];
 
   final List<String> statuses = ["Active", "Inactive"];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.existingData != null) {
+      itemUidController.text = widget.existingData!['uid'] ?? '';
+      itemNameController.text = widget.existingData!['name'] ?? '';
+
+      final cat = widget.existingData!['category'];
+      final stat = widget.existingData!['status'];
+
+      selectedCategory = categories.firstWhere(
+        (c) => c.toLowerCase() == cat,
+        orElse: () => categories.first,
+      );
+
+      selectedStatus = statuses.firstWhere(
+        (s) => s.toLowerCase() == stat,
+        orElse: () => statuses.first,
+      );
+    }
+  }
+
+  String sanitizeUid(String uid) {
+    return uid.trim().replaceAll(RegExp(r'[.#$\[\]/]'), '_');
+  }
+
+  Future<void> _saveItem() async {
+    final uid = sanitizeUid(itemUidController.text).toUpperCase();
+    final name = itemNameController.text.trim().toLowerCase();
+    final category = selectedCategory?.toLowerCase();
+    final status = selectedStatus?.toLowerCase();
+
+    if (uid.isEmpty || name.isEmpty || category == null || status == null) {
+      AppToast.showSuccess(context, "Fill all fields");
+      return;
+    }
+
+    await FirebaseService.addItem(uid, {
+      "uid": uid,
+      "name": name,
+      "category": category,
+      "status": status,
+      "createdAt": DateTime.now().toIso8601String(),
+    });
+
+    Navigator.pop(context);
+    AppToast.showSuccess(context, "Saved successfully");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,15 +109,13 @@ class _AddItemPageState extends State<AddItemPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: selectedCategory,
-                    hint: const Text("Select Category"),
+                    hint: const Text("Category"),
                     items: categories
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                         .toList(),
@@ -78,7 +129,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: selectedStatus,
-                    hint: const Text("Select Status"),
+                    hint: const Text("Status"),
                     items: statuses
                         .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                         .toList(),
@@ -90,29 +141,8 @@ class _AddItemPageState extends State<AddItemPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 32),
-
-            ElevatedButton(
-              onPressed: () async {
-                if (itemUidController.text.isNotEmpty &&
-                    itemNameController.text.isNotEmpty &&
-                    selectedCategory != null &&
-                    selectedStatus != null) {
-                  await FirebaseService.addItem({
-                    "uid": itemUidController.text,
-                    "name": itemNameController.text,
-                    "category": selectedCategory,
-                    "status": selectedStatus,
-                    "createdAt": DateTime.now().toIso8601String(),
-                  });
-
-                  AppToast.showSuccess(context, "Item added successfully");
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text("Add Item"),
-            ),
+            ElevatedButton(onPressed: _saveItem, child: const Text("Save")),
           ],
         ),
       ),

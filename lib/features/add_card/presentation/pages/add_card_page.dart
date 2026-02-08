@@ -3,7 +3,10 @@ import '../../../../core/services/firebase_service.dart';
 import '../../../../core/utils/app_toast.dart';
 
 class AddCardPage extends StatefulWidget {
-  const AddCardPage({super.key});
+  final String? editKey;
+  final Map? existingData;
+
+  const AddCardPage({super.key, this.editKey, this.existingData});
 
   @override
   State<AddCardPage> createState() => _AddCardPageState();
@@ -17,157 +20,124 @@ class _AddCardPageState extends State<AddCardPage> {
   String? selectedStatus;
 
   final List<String> roles = ["Shopkeeper", "Manager", "Admin", "Security"];
-
   final List<String> statuses = ["Authorized", "Unauthorized"];
 
   @override
-  void dispose() {
-    cardUidController.dispose();
-    handlerController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+
+    if (widget.existingData != null) {
+      cardUidController.text = widget.existingData!['cardUid'] ?? '';
+      handlerController.text = widget.existingData!['name'] ?? '';
+
+      final role = widget.existingData!['role'];
+      final status = widget.existingData!['status'];
+
+      selectedRole = roles.firstWhere(
+        (r) => r.toLowerCase() == role,
+        orElse: () => roles.first,
+      );
+
+      selectedStatus = statuses.firstWhere(
+        (s) => s.toLowerCase() == status,
+        orElse: () => statuses.first,
+      );
+    }
+  }
+
+  String sanitizeUid(String uid) {
+    return uid.trim().replaceAll(RegExp(r'[.#$\[\]/]'), '_');
+  }
+
+  Future<void> _saveCard() async {
+    final uid = sanitizeUid(cardUidController.text).toUpperCase();
+    final name = handlerController.text.trim().toLowerCase();
+    final role = selectedRole?.toLowerCase();
+    final status = selectedStatus?.toLowerCase();
+
+    if (uid.isEmpty || name.isEmpty || role == null || status == null) {
+      AppToast.showSuccess(context, "Please fill all fields");
+      return;
+    }
+
+    await FirebaseService.addHandler(uid, {
+      "cardUid": uid,
+      "name": name,
+      "role": role,
+      "status": status,
+      "createdAt": DateTime.now().toIso8601String(),
+    });
+
+    Navigator.pop(context);
+    AppToast.showSuccess(context, "Saved successfully");
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.grey.shade100,
-      padding: const EdgeInsets.all(24),
-      child: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Add Card",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
-
-              // Row 1: Card UID + Handler Name
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: cardUidController,
-                      decoration: const InputDecoration(
-                        labelText: "Card UID",
-                        border: OutlineInputBorder(),
-                      ),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Add Card")),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: cardUidController,
+                    decoration: const InputDecoration(
+                      labelText: "Card UID",
+                      border: OutlineInputBorder(),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: handlerController,
-                      decoration: const InputDecoration(
-                        labelText: "Handler Name",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Row 2: Role + Status
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: selectedRole,
-                      hint: const Text("Select Role"),
-                      items: roles
-                          .map(
-                            (role) => DropdownMenuItem(
-                              value: role,
-                              child: Text(role),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedRole = value;
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: selectedStatus,
-                      hint: const Text("Select Status"),
-                      items: statuses
-                          .map(
-                            (status) => DropdownMenuItem(
-                              value: status,
-                              child: Text(status),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedStatus = value;
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Add Button
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 16,
-                    ),
-                  ),
-                  onPressed: () async {
-                    if (cardUidController.text.isNotEmpty &&
-                        handlerController.text.isNotEmpty &&
-                        selectedRole != null &&
-                        selectedStatus != null) {
-                      await FirebaseService.addHandler({
-                        "cardUid": cardUidController.text,
-                        "name": handlerController.text,
-                        "role": selectedRole,
-                        "status": selectedStatus,
-                        "createdAt": DateTime.now().toIso8601String(),
-                      });
-
-                      cardUidController.clear();
-                      handlerController.clear();
-                      setState(() {
-                        selectedRole = null;
-                        selectedStatus = null;
-                      });
-
-                      AppToast.showSuccess(context, "Card added successfully");
-                    }
-                  },
-                  child: const Text(
-                    "Add",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: handlerController,
+                    decoration: const InputDecoration(
+                      labelText: "Handler Name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedRole,
+                    hint: const Text("Select Role"),
+                    items: roles
+                        .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                        .toList(),
+                    onChanged: (v) => setState(() => selectedRole = v),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedStatus,
+                    hint: const Text("Select Status"),
+                    items: statuses
+                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .toList(),
+                    onChanged: (v) => setState(() => selectedStatus = v),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(onPressed: _saveCard, child: const Text("Save")),
+          ],
         ),
       ),
     );
