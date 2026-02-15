@@ -11,14 +11,15 @@ class HandlersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       // ✅ ADD BUTTON (opens AddCardPage correctly)
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.add),
+        label: const Text("Add Handler"),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddCardPage()),
           );
         },
-        child: const Icon(Icons.add),
       ),
 
       body: Container(
