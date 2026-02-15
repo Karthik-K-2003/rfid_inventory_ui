@@ -24,18 +24,19 @@ class DashboardPage extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Cards Row
           Row(
             children: [
               _buildCountCard(
                 title: "Total Items",
-                icon: Icons.inventory,
+                icon: Icons.inventory_2,
+                color: Colors.blue,
                 ref: FirebaseService.itemsRef(),
               ),
               const SizedBox(width: 24),
               _buildCountCard(
                 title: "Handlers",
                 icon: Icons.people,
+                color: Colors.blue,
                 ref: FirebaseService.handlersRef(),
               ),
             ],
@@ -48,6 +49,7 @@ class DashboardPage extends StatelessWidget {
   Widget _buildCountCard({
     required String title,
     required IconData icon,
+    required Color color,
     required DatabaseReference ref,
   }) {
     return StreamBuilder(
@@ -62,28 +64,35 @@ class DashboardPage extends StatelessWidget {
 
         return SizedBox(
           width: 300,
-          height: 160,
+          height: 150,
           child: Card(
-            color: Colors.white,
             elevation: 4,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  Icon(icon, size: 40, color: Colors.blue),
+                  Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, size: 30, color: color),
+                  ),
                   const SizedBox(width: 18),
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
                       ),
@@ -91,9 +100,8 @@ class DashboardPage extends StatelessWidget {
                       Text(
                         count.toString(),
                         style: const TextStyle(
-                          fontSize: 30,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
                     ],

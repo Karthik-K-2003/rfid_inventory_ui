@@ -63,4 +63,10 @@ class FirebaseService {
   static Future<void> deleteHandler(String uid) async {
     await _db.child('handlers').child(uid).remove();
   }
+
+  // ================= LOGS =================
+
+  static DatabaseReference logsRef() {
+    return _db.child('logs');
+  }
 }

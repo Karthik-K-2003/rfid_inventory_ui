@@ -142,7 +142,14 @@ class _AddItemPageState extends State<AddItemPage> {
               ],
             ),
             const SizedBox(height: 32),
-            ElevatedButton(onPressed: _saveItem, child: const Text("Save")),
+            SizedBox(
+              width: 160,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _saveItem,
+                child: const Text("Save", style: TextStyle(fontSize: 16)),
+              ),
+            ),
           ],
         ),
       ),
