@@ -20,7 +20,6 @@ class _AddCardPageState extends State<AddCardPage> {
   String? selectedStatus;
 
   final List<String> roles = ["Shopkeeper", "Manager", "Admin", "Security"];
-
   final List<String> statuses = ["Authorized", "Unauthorized"];
 
   @override
@@ -29,7 +28,6 @@ class _AddCardPageState extends State<AddCardPage> {
 
     if (widget.existingData != null) {
       cardUidController.text = widget.existingData!['cardUid'] ?? '';
-
       handlerController.text = widget.existingData!['name'] ?? '';
 
       selectedRole = roles.firstWhere(
@@ -58,119 +56,118 @@ class _AddCardPageState extends State<AddCardPage> {
   Future<void> _saveCard() async {
     final uid = sanitizeUid(cardUidController.text).toUpperCase();
     final name = handlerController.text.trim().toLowerCase();
+    final role = selectedRole?.toLowerCase();
+    final status = selectedStatus?.toLowerCase();
 
-    if (uid.isEmpty ||
-        name.isEmpty ||
-        selectedRole == null ||
-        selectedStatus == null) {
-      AppToast.showSuccess(context, "Please fill all fields");
+    if (uid.isEmpty || name.isEmpty || role == null || status == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please fill all fields"),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
     await FirebaseService.addHandler(uid, {
       "cardUid": uid,
       "name": name,
-      "role": selectedRole!.toLowerCase(),
-      "status": selectedStatus!.toLowerCase(),
+      "role": role,
+      "status": status,
       "updatedAt": DateTime.now().toIso8601String(),
     });
 
     AppToast.showSuccess(context, "Saved successfully");
 
-    // ✅ DO NOT POP — THIS PAGE IS PART OF DASHBOARD LAYOUT
+    if (!mounted) return;
+
+    // ✅ THIS keeps NavigationRail intact
+    Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      color: Colors.grey.shade100,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.existingData == null ? "Add Card" : "Edit Card",
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 24),
-
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: cardUidController,
-                  enabled: widget.existingData == null,
-                  decoration: const InputDecoration(
-                    labelText: "Card UID",
-                    border: OutlineInputBorder(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.existingData == null ? "Add Card" : "Edit Card"),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: cardUidController,
+                    enabled: widget.existingData == null,
+                    decoration: const InputDecoration(
+                      labelText: "Card UID",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextField(
-                  controller: handlerController,
-                  decoration: const InputDecoration(
-                    labelText: "Handler Name",
-                    border: OutlineInputBorder(),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: handlerController,
+                    decoration: const InputDecoration(
+                      labelText: "Handler Name",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: selectedRole,
-                  hint: const Text("Select Role"),
-                  items: roles
-                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                      .toList(),
-                  onChanged: (v) => setState(() => selectedRole = v),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedRole,
+                    hint: const Text("Select Role"),
+                    items: roles
+                        .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                        .toList(),
+                    onChanged: (v) => setState(() => selectedRole = v),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: selectedStatus,
-                  hint: const Text("Select Status"),
-                  items: statuses
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                      .toList(),
-                  onChanged: (v) => setState(() => selectedStatus = v),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedStatus,
+                    hint: const Text("Select Status"),
+                    items: statuses
+                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .toList(),
+                    onChanged: (v) => setState(() => selectedStatus = v),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
-
-          Center(
-            child: SizedBox(
-              width: 160,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _saveCard,
-                child: Text(
-                  widget.existingData == null ? "Add" : "Save",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: SizedBox(
+                width: 160,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _saveCard,
+                  child: Text(
+                    widget.existingData == null ? "Add" : "Save",
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

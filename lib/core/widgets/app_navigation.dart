@@ -38,14 +38,13 @@ class AppNavigationRail extends StatelessWidget {
           label: Text('Dashboard'),
         ),
 
-        NavigationRailDestination(
-          icon: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Icon(Icons.add_card),
-          ),
-          label: Text('Add Card'),
-        ),
-
+        // NavigationRailDestination(
+        //   icon: Padding(
+        //     padding: EdgeInsets.symmetric(horizontal: 12),
+        //     child: Icon(Icons.add_card),
+        //   ),
+        //   label: Text('Add Card'),
+        // ),
         NavigationRailDestination(
           icon: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),

@@ -10,6 +10,17 @@ class HandlersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ✅ ADD BUTTON (opens AddCardPage correctly)
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddCardPage()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+
       body: Container(
         color: Colors.grey.shade100,
         padding: const EdgeInsets.all(24),
@@ -32,18 +43,15 @@ class HandlersPage extends StatelessWidget {
                   return Card(
                     child: ListTile(
                       leading: const Icon(Icons.person, color: Colors.blue),
-
                       title: Text(
                         data['name'] ?? '',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-
                       subtitle: Text("${data['role']} - ${data['status']}"),
-
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // ✅ EDIT BUTTON
+                          // ✅ EDIT
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.orange),
                             onPressed: () {
@@ -59,7 +67,7 @@ class HandlersPage extends StatelessWidget {
                             },
                           ),
 
-                          // ✅ DELETE BUTTON
+                          // ✅ DELETE
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
