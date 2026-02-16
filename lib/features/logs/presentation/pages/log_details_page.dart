@@ -17,33 +17,50 @@ class LogDetailsPage extends StatelessWidget {
           spacing: 24,
           runSpacing: 24,
           children: [
+            // 🔹 Handler Name
             StatCard(
-              title: "Log ID",
-              value: logId,
-              icon: Icons.confirmation_number,
-              iconColor: Colors.deepPurple,
-            ),
-            StatCard(
-              title: "Handler UID",
-              value: logData['handler'] ?? "-",
+              title: "Handler",
+              value: logData['handlerName'] ?? logData['handler'] ?? "-",
               icon: Icons.person,
               iconColor: Colors.blue,
             ),
+
+            // 🔹 Handler UID (optional but useful)
             StatCard(
-              title: "Item UID",
-              value: logData['item'] ?? "-",
+              title: "Handler UID",
+              value: logData['handlerId'] ?? logData['handler'] ?? "-",
+              icon: Icons.badge,
+              iconColor: Colors.blueGrey,
+            ),
+
+            // 🔹 Item Name
+            StatCard(
+              title: "Item",
+              value: logData['itemName'] ?? logData['item'] ?? "-",
               icon: Icons.inventory_2,
               iconColor: Colors.orange,
             ),
+
+            // 🔹 Item UID (optional)
+            StatCard(
+              title: "Item UID",
+              value: logData['itemId'] ?? logData['item'] ?? "-",
+              icon: Icons.qr_code,
+              iconColor: Colors.orangeAccent,
+            ),
+
+            // 🔹 Action
             StatCard(
               title: "Action",
               value: logData['action'] ?? "-",
               icon: Icons.sync_alt,
               iconColor: logData['action'] == "IN" ? Colors.green : Colors.red,
             ),
+
+            // 🔹 Time
             StatCard(
               title: "Time",
-              value: logData['time'].toString(),
+              value: _formatTime(logData['time']),
               icon: Icons.access_time,
               iconColor: Colors.grey,
             ),
@@ -51,5 +68,21 @@ class LogDetailsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // helper to format time nicely
+  String _formatTime(dynamic time) {
+    if (time == null) return '-';
+
+    int ts = int.tryParse(time.toString()) ?? 0;
+
+    // OLD logs safety check
+    if (ts < 1000000000000) {
+      return 'Old log';
+    }
+
+    final date = DateTime.fromMillisecondsSinceEpoch(ts);
+    return "${date.day}-${date.month}-${date.year} "
+        "${date.hour}:${date.minute.toString().padLeft(2, '0')}";
   }
 }

@@ -18,6 +18,7 @@ class LogsPage extends StatelessWidget {
             "Logs",
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
+
           const SizedBox(height: 24),
 
           Expanded(
@@ -52,12 +53,8 @@ class LogsPage extends StatelessWidget {
                         child: const Icon(Icons.history, color: Colors.indigo),
                       ),
                       title: Text(
-                        data['handler'] ?? 'Unknown Handler',
+                        data['handlerName'] ?? 'Unknown Handler',
                         style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        "Action: ${data['action']}",
-                        style: const TextStyle(color: Colors.grey),
                       ),
                       trailing: const Icon(
                         Icons.arrow_forward_ios,
